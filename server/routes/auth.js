@@ -16,6 +16,23 @@ function generateToken(user) {
   );
 }
 
+const isProd = process.env.NODE_ENV === 'production';
+
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: isProd,
+  sameSite: isProd ? 'none' : 'lax',
+  maxAge: 24 * 60 * 60 * 1000, // 24 hours
+  path: '/'
+};
+
+const CLEAR_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: isProd,
+  sameSite: isProd ? 'none' : 'lax',
+  path: '/'
+};
+
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   const { username, password } = req.body;
@@ -48,13 +65,7 @@ router.post('/register', async (req, res) => {
     const newUser = result.rows[0];
     const token = generateToken(newUser);
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      path: '/'
-    });
+    res.cookie('token', token, COOKIE_OPTIONS);
 
     return res.status(201).json({
       message: 'Registration successful',
@@ -102,13 +113,7 @@ router.post('/login', async (req, res) => {
 
     const token = generateToken(user);
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      path: '/'
-    });
+    res.cookie('token', token, COOKIE_OPTIONS);
 
     return res.status(200).json({
       message: 'Login successful',
@@ -132,12 +137,7 @@ router.get('/me', authMiddleware, (req, res) => {
 
 // POST /api/auth/logout
 router.post('/logout', (req, res) => {
-  res.clearCookie('token', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/'
-  });
+  res.clearCookie('token', CLEAR_COOKIE_OPTIONS);
   return res.status(200).json({ message: 'Logout successful' });
 });
 
