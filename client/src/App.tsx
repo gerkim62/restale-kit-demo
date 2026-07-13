@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { LogOut, RotateCw, ClipboardCheck, ClipboardList, RefreshCw } from 'lucide-react';
+import { LogOut, RotateCw, ClipboardCheck, ClipboardList } from 'lucide-react';
 import { api, getStoredUser, type Todo } from './api';
 import AuthCard from './components/AuthCard';
 import TodoForm from './components/TodoForm';
@@ -115,60 +115,42 @@ function App() {
           isPending={createTodoMutation.isPending} 
         />
       </section>
-
-      {/* Sync Warning / Info Notification */}
-      {showSyncNotice && (
-        <div 
-          className="animate-fade-in"
-          style={{ 
-            background: 'hsl(var(--accent-glow))',
-            border: '1px solid hsl(var(--accent) / 0.3)',
-            borderRadius: 'var(--radius-md)',
-            padding: '1rem',
-            marginBottom: '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'between',
-            gap: '1rem'
-          }}
-        >
-          <div style={{ flex: 1 }}>
-            <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#fff' }}>
-              Task Created! (Cache Untouched)
-            </h4>
-            <p style={{ margin: 0, fontSize: '0.85rem', color: 'hsl(var(--text-muted))' }}>
-              As requested, mutations do not trigger automatic cache invalidation. Click refresh to sync.
-            </p>
-          </div>
-          <button 
-            onClick={handleManualRefresh} 
-            style={{ 
-              background: 'hsl(var(--accent))', 
-              fontSize: '0.85rem', 
-              padding: '0.5rem 0.75rem', 
-              height: '34px' 
-            }}
-          >
-            <RefreshCw size={14} className={isRefetching ? 'animate-spin' : ''} />
-            <span>Sync</span>
-          </button>
-        </div>
-      )}
-
       {/* Todos List Section */}
       <section className="glass-panel p-6">
         <div className="flex justify-between items-center mb-4">
-          <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: '#fff', margin: 0 }}>
-            My Todo Tasks
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: '#fff', margin: 0 }}>
+              My Todo Tasks
+            </h3>
+            {showSyncNotice && (
+              <span 
+                className="animate-fade-in"
+                style={{ 
+                  fontSize: '0.75rem', 
+                  color: 'hsl(var(--accent-hover))', 
+                  fontStyle: 'italic',
+                  fontWeight: 500
+                }}
+              >
+                (unsynced)
+              </span>
+            )}
+          </div>
           <button 
             onClick={handleManualRefresh} 
             disabled={isLoading || isRefetching}
             className="btn-secondary"
-            style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', height: '32px' }}
+            style={{ 
+              padding: '0.4rem 0.8rem', 
+              fontSize: '0.85rem', 
+              height: '32px',
+              borderColor: showSyncNotice ? 'hsl(var(--accent))' : 'hsl(var(--card-border))',
+              background: showSyncNotice ? 'hsl(var(--accent-glow))' : 'hsl(224 71% 12% / 0.5)',
+              boxShadow: showSyncNotice ? '0 0 10px 0 hsl(var(--accent-glow))' : 'none'
+            }}
           >
             <RotateCw className={isRefetching ? 'animate-spin' : ''} size={14} />
-            <span>{isRefetching ? 'Syncing...' : 'Refresh'}</span>
+            <span>{isRefetching ? 'Syncing...' : showSyncNotice ? 'Sync Changes' : 'Refresh'}</span>
           </button>
         </div>
 

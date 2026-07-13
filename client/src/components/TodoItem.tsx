@@ -10,6 +10,7 @@ interface TodoItemProps {
 export const TodoItem: FC<TodoItemProps> = ({ todo }) => {
   const [completed, setCompleted] = useState(todo.completed);
   const [isDeleted, setIsDeleted] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Synchronize local completed state when props change
   useEffect(() => {
@@ -19,26 +20,28 @@ export const TodoItem: FC<TodoItemProps> = ({ todo }) => {
   // Toggle completion mutation
   const toggleMutation = useMutation({
     mutationFn: async () => {
+      setErrorMsg(null);
       const targetState = !completed;
       setCompleted(targetState); // Optimistic update
       return api.updateTodo(todo.id, { completed: targetState });
     },
     onError: (error: any) => {
       setCompleted(todo.completed); // Revert on error
-      alert(error.message || 'Failed to update todo status');
+      setErrorMsg(error.message || 'Failed to update status');
     },
   });
 
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async () => {
+      setErrorMsg(null);
       return api.deleteTodo(todo.id);
     },
     onSuccess: () => {
       setIsDeleted(true); // Locally hide the deleted item
     },
     onError: (error: any) => {
-      alert(error.message || 'Failed to delete todo');
+      setErrorMsg(error.message || 'Failed to delete task');
     },
   });
 
@@ -92,19 +95,47 @@ export const TodoItem: FC<TodoItemProps> = ({ todo }) => {
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
-            paddingLeft: '0.25rem'
+            paddingLeft: '0.25rem',
+            flex: 1
           }}
         >
           {todo.title}
         </span>
+
+        {/* Optimistic / Mutation state or error indicator */}
+        {isPending ? (
+          <span 
+            style={{ 
+              fontSize: '0.8rem', 
+              color: deleteMutation.isPending ? 'hsl(var(--rose))' : 'hsl(var(--accent-hover))', 
+              fontStyle: 'italic', 
+              marginLeft: '0.5rem',
+              fontWeight: 500,
+              flexShrink: 0
+            }}
+          >
+            {deleteMutation.isPending ? 'deleting...' : 'updating...'}
+          </span>
+        ) : errorMsg ? (
+          <span 
+            style={{ 
+              fontSize: '0.8rem', 
+              color: 'hsl(var(--rose))', 
+              fontStyle: 'italic', 
+              marginLeft: '0.5rem',
+              fontWeight: 500,
+              flexShrink: 0
+            }}
+          >
+            {errorMsg}
+          </span>
+        ) : null}
       </div>
 
       {/* Delete Action */}
       <button
         onClick={() => {
-          if (confirm('Are you sure you want to delete this task?')) {
-            deleteMutation.mutate();
-          }
+          deleteMutation.mutate();
         }}
         disabled={isPending}
         className="btn-danger"

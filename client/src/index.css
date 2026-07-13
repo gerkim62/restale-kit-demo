@@ -65,6 +65,7 @@ body {
 
 /* Glassmorphism card container */
 .glass-panel {
+  width: 100%;
   background: hsl(var(--card-bg));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -219,5 +220,14 @@ input.input-error {
   font-weight: 500;
   margin-top: 0.25rem;
   display: block;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 
