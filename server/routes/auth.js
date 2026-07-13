@@ -2,6 +2,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { pool } from '../db.js';
+import { authMiddleware } from '../middleware/auth.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_development_secret';
@@ -47,9 +48,16 @@ router.post('/register', async (req, res) => {
     const newUser = result.rows[0];
     const token = generateToken(newUser);
 
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      path: '/'
+    });
+
     return res.status(201).json({
       message: 'Registration successful',
-      token,
       user: {
         id: newUser.id,
         username: newUser.username
@@ -94,9 +102,16 @@ router.post('/login', async (req, res) => {
 
     const token = generateToken(user);
 
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      path: '/'
+    });
+
     return res.status(200).json({
       message: 'Login successful',
-      token,
       user: {
         id: user.id,
         username: user.username
@@ -106,6 +121,24 @@ router.post('/login', async (req, res) => {
     console.error('Login error:', error);
     return res.status(500).json({ error: 'An error occurred during login.' });
   }
+});
+
+// GET /api/auth/me
+router.get('/me', authMiddleware, (req, res) => {
+  return res.status(200).json({
+    user: req.user
+  });
+});
+
+// POST /api/auth/logout
+router.post('/logout', (req, res) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/'
+  });
+  return res.status(200).json({ message: 'Logout successful' });
 });
 
 export default router;

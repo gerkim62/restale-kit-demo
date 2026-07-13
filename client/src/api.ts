@@ -1,20 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-// Helper to get stored auth token
-export function getAuthToken(): string | null {
-  return localStorage.getItem('todo_jwt_token');
-}
-
-// Helper to set stored auth token
-export function setAuthToken(token: string | null) {
-  if (token) {
-    localStorage.setItem('todo_jwt_token', token);
-  } else {
-    localStorage.removeItem('todo_jwt_token');
-    localStorage.removeItem('todo_user');
-  }
-}
-
 // Helper to get stored user details
 export function getStoredUser(): { id: number; username: string } | null {
   const userStr = localStorage.getItem('todo_user');
@@ -38,12 +23,6 @@ export function setStoredUser(user: { id: number; username: string } | null) {
 // Base request wrapper
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const headers = new Headers(options.headers || {});
-  
-  // Attach auth token if available
-  const token = getAuthToken();
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
 
   // Set default JSON Content-Type if body is present and not already set
   if (options.body && !headers.has('Content-Type')) {
@@ -52,6 +31,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
+    credentials: options.credentials || 'include',
     headers,
   });
 
@@ -82,7 +62,7 @@ export interface User {
 
 export interface AuthResponse {
   message: string;
-  token: string;
+  token?: string;
   user: User;
 }
 
@@ -101,7 +81,6 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ username, password }),
     });
-    setAuthToken(data.token);
     setStoredUser(data.user);
     return data;
   },
@@ -111,13 +90,20 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ username, password }),
     });
-    setAuthToken(data.token);
     setStoredUser(data.user);
     return data;
   },
 
-  logout() {
-    setAuthToken(null);
+  async logout(): Promise<void> {
+    try {
+      await request('/auth/logout', { method: 'POST' });
+    } finally {
+      setStoredUser(null);
+    }
+  },
+
+  async getMe(): Promise<{ user: User }> {
+    return request<{ user: User }>('/auth/me');
   },
 
   // Todo endpoints

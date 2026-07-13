@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ClipboardCheck, ClipboardList, LogOut, RotateCw } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useReStale } from 'restale-kit/react';
 import { tanstackAdapter } from 'restale-kit/tanstack-query';
 import { api, getStoredUser, type Todo } from './api';
@@ -12,13 +12,28 @@ import TodoItem from './components/TodoItem';
 const SSE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api') + '/sse';
 
 function App() {
-  const [user, setUser] = useState(getStoredUser());
+  const [user, setUser] = useState<{ id: number; username: string } | null>(null);
+  const [checkingSession, setCheckingSession] = useState(true);
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    api.getMe()
+      .then((data) => {
+        setUser(data.user);
+      })
+      .catch(() => {
+        setUser(null);
+      })
+      .finally(() => {
+        setCheckingSession(false);
+      });
+  }, []);
 
   // Setup real-time cache invalidation over Server-Sent Events (SSE)
   useReStale(SSE_URL, {
     onInvalidate: tanstackAdapter(queryClient),
     disabled: !user,
+    withCredentials: true,
   });
 
   // Fetch Todos Query
@@ -47,14 +62,30 @@ function App() {
     setUser(getStoredUser());
   };
 
-  const handleLogout = () => {
-    api.logout();
-    setUser(null);
+  const handleLogout = async () => {
+    try {
+      await api.logout();
+    } catch (err) {
+      console.error('Logout failed:', err);
+    } finally {
+      setUser(null);
+      queryClient.clear();
+    }
   };
 
   const handleManualRefresh = () => {
     refetch();
   };
+
+  if (checkingSession) {
+    return (
+      <main className="w-full flex justify-center items-center p-4 min-h-screen">
+        <div className="glass-panel p-8 w-full max-w-md flex justify-center items-center">
+          <SkeletonLoader />
+        </div>
+      </main>
+    );
+  }
 
   // If not authenticated, render the Auth card
   if (!user) {

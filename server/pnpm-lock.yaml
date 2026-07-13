@@ -226,8 +226,8 @@ importers:
         specifier: ^8.22.0
         version: 8.22.0
       restale-kit:
-        specifier: ^0.1.1
-        version: 0.1.1
+        specifier: ^0.1.2
+        version: 0.1.2
     devDependencies:
       nodemon:
         specifier: ^3.1.14
@@ -623,8 +623,8 @@ packages:
     resolution: {integrity: sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==}
     engines: {node: '>=8.10.0'}
 
-  restale-kit@0.1.1:
-    resolution: {integrity: sha512-LAzlczkgvkEg2ORXl0QmoZvNmOMoomXY7yniie5btqrWT6z4A3+BqZoUVMFFKfJlVdMBkCCFnWW0CPLTLwPRew==}
+  restale-kit@0.1.2:
+    resolution: {integrity: sha512-sSG3EAHg12w5DSTGxOvf81pKIyunFnbJiQ6oduVmoF4Pt5yvBH+tFut1O1KYTh3PSqqLK2LuKmF4sZFIbdPhBg==}
     engines: {node: '>=22.13.0'}
     peerDependencies:
       '@tanstack/react-query': ^5.0.0
@@ -1138,7 +1138,7 @@ snapshots:
     dependencies:
       picomatch: 2.3.2
 
-  restale-kit@0.1.1: {}
+  restale-kit@0.1.2: {}
 
   router@2.2.0(supports-color@5.5.0):
     dependencies:

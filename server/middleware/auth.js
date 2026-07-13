@@ -7,17 +7,21 @@ if (JWT_SECRET === 'fallback_development_secret') {
 }
 
 export function authMiddleware(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  if (!authHeader) {
-    return res.status(401).json({ error: 'Access denied. No authorization header provided.' });
+  const cookieHeader = req.headers.cookie;
+  let token = null;
+
+  if (cookieHeader) {
+    const cookies = {};
+    cookieHeader.split(';').forEach(cookie => {
+      const parts = cookie.split('=');
+      cookies[parts[0].trim()] = parts.slice(1).join('=').trim();
+    });
+    token = cookies['token'];
   }
 
-  const parts = authHeader.split(' ');
-  if (parts.length !== 2 || parts[0] !== 'Bearer') {
-    return res.status(401).json({ error: 'Access denied. Invalid token format. Expected: Bearer <token>' });
+  if (!token) {
+    return res.status(401).json({ error: 'Access denied. No authentication token provided.' });
   }
-
-  const token = parts[1];
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);

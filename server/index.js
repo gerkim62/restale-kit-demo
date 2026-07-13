@@ -15,7 +15,16 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Enable CORS and JSON body parser
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || /^https?:\/\/localhost:\d+$/.test(origin) || /^https?:\/\/127\.0\.0\.1:\d+$/.test(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 app.use(express.json());
 
 // Health Check Endpoint

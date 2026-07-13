@@ -1,2 +1,3 @@
 minimumReleaseAgeExclude:
   - restale-kit@0.1.1
+  - restale-kit@0.1.2
