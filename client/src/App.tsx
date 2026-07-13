@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { LogOut, RotateCw, ClipboardCheck, ClipboardList } from 'lucide-react';
+import { useReStale } from 'restale-kit/react';
+import { tanstackAdapter } from 'restale-kit/tanstack-query';
 import { api, getStoredUser, type Todo } from './api';
 import AuthCard from './components/AuthCard';
 import TodoForm from './components/TodoForm';
@@ -9,7 +11,13 @@ import SkeletonLoader from './components/SkeletonLoader';
 
 function App() {
   const [user, setUser] = useState(getStoredUser());
-  const [showSyncNotice, setShowSyncNotice] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Setup real-time cache invalidation over Server-Sent Events (SSE)
+  useReStale('/api/sse', {
+    onInvalidate: tanstackAdapter(queryClient),
+    disabled: !user,
+  });
 
   // Fetch Todos Query
   const { 
@@ -25,15 +33,9 @@ function App() {
     enabled: !!user,
   });
 
-  // Create Todo Mutation (no automatic query invalidation)
+  // Create Todo Mutation
   const createTodoMutation = useMutation({
     mutationFn: api.createTodo,
-    onSuccess: () => {
-      // Show notice that cache is not invalidated and needs manual refresh
-      setShowSyncNotice(true);
-      // Auto-hide notice after 8 seconds
-      setTimeout(() => setShowSyncNotice(false), 8000);
-    },
     onError: (err: any) => {
       alert(err.message || 'Failed to create todo');
     }
@@ -41,18 +43,15 @@ function App() {
 
   const handleAuthSuccess = () => {
     setUser(getStoredUser());
-    setShowSyncNotice(false);
   };
 
   const handleLogout = () => {
     api.logout();
     setUser(null);
-    setShowSyncNotice(false);
   };
 
   const handleManualRefresh = () => {
     refetch();
-    setShowSyncNotice(false);
   };
 
   // If not authenticated, render the Auth card
@@ -118,39 +117,17 @@ function App() {
       {/* Todos List Section */}
       <section className="glass-panel p-6">
         <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-2">
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: '#fff', margin: 0 }}>
-              My Todo Tasks
-            </h3>
-            {showSyncNotice && (
-              <span 
-                className="animate-fade-in"
-                style={{ 
-                  fontSize: '0.75rem', 
-                  color: 'hsl(var(--accent-hover))', 
-                  fontStyle: 'italic',
-                  fontWeight: 500
-                }}
-              >
-                (unsynced)
-              </span>
-            )}
-          </div>
+          <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: '#fff', margin: 0 }}>
+            My Todo Tasks
+          </h3>
           <button 
             onClick={handleManualRefresh} 
             disabled={isLoading || isRefetching}
             className="btn-secondary"
-            style={{ 
-              padding: '0.4rem 0.8rem', 
-              fontSize: '0.85rem', 
-              height: '32px',
-              borderColor: showSyncNotice ? 'hsl(var(--accent))' : 'hsl(var(--card-border))',
-              background: showSyncNotice ? 'hsl(var(--accent-glow))' : 'hsl(224 71% 12% / 0.5)',
-              boxShadow: showSyncNotice ? '0 0 10px 0 hsl(var(--accent-glow))' : 'none'
-            }}
+            style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', height: '32px' }}
           >
             <RotateCw className={isRefetching ? 'animate-spin' : ''} size={14} />
-            <span>{isRefetching ? 'Syncing...' : showSyncNotice ? 'Sync Changes' : 'Refresh'}</span>
+            <span>{isRefetching ? 'Syncing...' : 'Refresh'}</span>
           </button>
         </div>
 

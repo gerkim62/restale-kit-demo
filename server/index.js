@@ -4,6 +4,9 @@ import dotenv from 'dotenv';
 import { initDb } from './db.js';
 import authRouter from './routes/auth.js';
 import todosRouter from './routes/todos.js';
+import { attachSSE } from 'restale-kit/express';
+import { sseGroup } from './sse.js';
+import { authMiddleware } from './middleware/auth.js';
 
 // Load environment variables
 dotenv.config();
@@ -23,6 +26,16 @@ app.get('/health', (req, res) => {
 // Register Routers
 app.use('/api/auth', authRouter);
 app.use('/api/todos', todosRouter);
+
+// SSE real-time cache invalidation endpoint
+app.get('/api/sse', authMiddleware, (req, res) => {
+  const channel = attachSSE(req, res);
+  sseGroup.register(channel, { userId: req.user.id });
+
+  req.on('close', () => {
+    sseGroup.deregister(channel);
+  });
+});
 
 // Database initialization & server start
 async function startServer() {
