@@ -1,32 +1,34 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ClipboardCheck, ClipboardList, LogOut, RotateCw } from 'lucide-react';
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { LogOut, RotateCw, ClipboardCheck, ClipboardList } from 'lucide-react';
 import { useReStale } from 'restale-kit/react';
 import { tanstackAdapter } from 'restale-kit/tanstack-query';
 import { api, getStoredUser, type Todo } from './api';
 import AuthCard from './components/AuthCard';
+import SkeletonLoader from './components/SkeletonLoader';
 import TodoForm from './components/TodoForm';
 import TodoItem from './components/TodoItem';
-import SkeletonLoader from './components/SkeletonLoader';
+
+const SSE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api') + '/sse';
 
 function App() {
   const [user, setUser] = useState(getStoredUser());
   const queryClient = useQueryClient();
 
   // Setup real-time cache invalidation over Server-Sent Events (SSE)
-  useReStale('/api/sse', {
+  useReStale(SSE_URL, {
     onInvalidate: tanstackAdapter(queryClient),
     disabled: !user,
   });
 
   // Fetch Todos Query
-  const { 
-    data: todos = [], 
-    isLoading, 
-    isError, 
-    error, 
-    refetch, 
-    isRefetching 
+  const {
+    data: todos = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isRefetching
   } = useQuery<Todo[]>({
     queryKey: ['todos'],
     queryFn: api.getTodos,
@@ -68,11 +70,11 @@ function App() {
       {/* Header Panel */}
       <header className="glass-panel p-6 flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
-          <div 
-            style={{ 
-              width: '40px', 
-              height: '40px', 
-              borderRadius: '10px', 
+          <div
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '10px',
               background: 'linear-gradient(135deg, hsl(var(--accent)), hsl(var(--accent-hover)))',
               display: 'flex',
               alignItems: 'center',
@@ -92,8 +94,8 @@ function App() {
           </div>
         </div>
 
-        <button 
-          onClick={handleLogout} 
+        <button
+          onClick={handleLogout}
           className="btn-danger"
           style={{ height: '40px', padding: '0 1rem' }}
         >
@@ -107,11 +109,11 @@ function App() {
         <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: '#fff', margin: '0 0 1rem 0' }}>
           Create New Task
         </h3>
-        <TodoForm 
+        <TodoForm
           onSubmit={async (title) => {
             await createTodoMutation.mutateAsync(title);
-          }} 
-          isPending={createTodoMutation.isPending} 
+          }}
+          isPending={createTodoMutation.isPending}
         />
       </section>
       {/* Todos List Section */}
@@ -120,8 +122,8 @@ function App() {
           <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: '#fff', margin: 0 }}>
             My Todo Tasks
           </h3>
-          <button 
-            onClick={handleManualRefresh} 
+          <button
+            onClick={handleManualRefresh}
             disabled={isLoading || isRefetching}
             className="btn-secondary"
             style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', height: '32px' }}
@@ -134,10 +136,10 @@ function App() {
         {isLoading ? (
           <SkeletonLoader />
         ) : isError ? (
-          <div 
-            style={{ 
-              textAlign: 'center', 
-              padding: '2rem 1rem', 
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '2rem 1rem',
               color: 'hsl(var(--rose))',
               background: 'hsl(var(--rose-glow))',
               borderRadius: 'var(--radius-md)',
@@ -152,10 +154,10 @@ function App() {
             </button>
           </div>
         ) : todos.length === 0 ? (
-          <div 
-            style={{ 
-              textAlign: 'center', 
-              padding: '3rem 1rem', 
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '3rem 1rem',
               color: 'hsl(var(--text-muted))',
               display: 'flex',
               flexDirection: 'column',
