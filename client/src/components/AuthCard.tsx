@@ -1,4 +1,4 @@
-import { useState, type FC } from 'react';
+import { useState, type FC, type FormEvent } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { LogIn, UserPlus, Loader2 } from 'lucide-react';
 import { api, type AuthResponse } from '../api';
@@ -7,11 +7,17 @@ interface AuthCardProps {
   onAuthSuccess: (authData: AuthResponse) => void;
 }
 
+interface FormErrors {
+  username?: string;
+  password?: string;
+  api?: string;
+}
+
 export const AuthCard: FC<AuthCardProps> = ({ onAuthSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   // Login mutation
   const loginMutation = useMutation({
@@ -20,7 +26,7 @@ export const AuthCard: FC<AuthCardProps> = ({ onAuthSuccess }) => {
       onAuthSuccess(data);
     },
     onError: (error: any) => {
-      setValidationError(error.message || 'Login failed. Please check your credentials.');
+      setErrors({ api: error.message || 'Login failed. Please check your credentials.' });
     }
   });
 
@@ -31,32 +37,35 @@ export const AuthCard: FC<AuthCardProps> = ({ onAuthSuccess }) => {
       onAuthSuccess(data);
     },
     onError: (error: any) => {
-      setValidationError(error.message || 'Registration failed. Username may be taken.');
+      setErrors({ api: error.message || 'Registration failed. Username may be taken.' });
     }
   });
 
   const isPending = loginMutation.isPending || registerMutation.isPending;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    setValidationError(null);
+    const newErrors: FormErrors = {};
 
     const cleanUsername = username.trim();
-    if (!cleanUsername || !password) {
-      setValidationError('All fields are required.');
+    if (!cleanUsername) {
+      newErrors.username = 'Username is required.';
+    } else if (cleanUsername.length < 3) {
+      newErrors.username = 'Username must be at least 3 characters.';
+    }
+
+    if (!password) {
+      newErrors.password = 'Password is required.';
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters.';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
-    if (cleanUsername.length < 3) {
-      setValidationError('Username must be at least 3 characters.');
-      return;
-    }
-
-    if (password.length < 6) {
-      setValidationError('Password must be at least 6 characters.');
-      return;
-    }
-
+    setErrors({});
     if (isLogin) {
       loginMutation.mutate();
     } else {
@@ -83,10 +92,18 @@ export const AuthCard: FC<AuthCardProps> = ({ onAuthSuccess }) => {
             type="text"
             placeholder="Enter username"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => {
+              setUsername(e.target.value);
+              if (errors.username) setErrors(prev => ({ ...prev, username: undefined }));
+              if (errors.api) setErrors(prev => ({ ...prev, api: undefined }));
+            }}
+            className={errors.username ? 'input-error' : ''}
             disabled={isPending}
             autoComplete="username"
           />
+          {errors.username && (
+            <span className="error-text">{errors.username}</span>
+          )}
         </div>
 
         {/* Password Input */}
@@ -96,14 +113,22 @@ export const AuthCard: FC<AuthCardProps> = ({ onAuthSuccess }) => {
             type="password"
             placeholder="••••••••"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
+              if (errors.api) setErrors(prev => ({ ...prev, api: undefined }));
+            }}
+            className={errors.password ? 'input-error' : ''}
             disabled={isPending}
             autoComplete="current-password"
           />
+          {errors.password && (
+            <span className="error-text">{errors.password}</span>
+          )}
         </div>
 
-        {/* Error Feedback */}
-        {validationError && (
+        {/* API Error Feedback */}
+        {errors.api && (
           <div 
             style={{ 
               color: 'hsl(var(--rose))', 
@@ -114,7 +139,7 @@ export const AuthCard: FC<AuthCardProps> = ({ onAuthSuccess }) => {
               fontSize: '0.85rem'
             }}
           >
-            {validationError}
+            {errors.api}
           </div>
         )}
 
@@ -140,7 +165,7 @@ export const AuthCard: FC<AuthCardProps> = ({ onAuthSuccess }) => {
             e.preventDefault();
             if (!isPending) {
               setIsLogin(!isLogin);
-              setValidationError(null);
+              setErrors({});
             }
           }}
           style={{ 
