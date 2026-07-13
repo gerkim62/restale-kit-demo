@@ -15,12 +15,32 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Enable CORS and JSON body parser
+const allowedOrigins = [
+  /^https?:\/\/localhost:\d+$/,
+  /^https?:\/\/127\.0\.0\.1:\d+$/
+];
+
+if (process.env.CLIENT_URL) {
+  const urls = process.env.CLIENT_URL.split(',').map(url => url.trim());
+  allowedOrigins.push(...urls);
+}
+
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || /^https?:\/\/localhost:\d+$/.test(origin) || /^https?:\/\/127\.0\.0\.1:\d+$/.test(origin)) {
+    if (!origin) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      const isAllowed = allowedOrigins.some(allowed => {
+        if (allowed instanceof RegExp) {
+          return allowed.test(origin);
+        }
+        return allowed === origin;
+      });
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
     }
   },
   credentials: true
