@@ -35,7 +35,7 @@ router.post('/', async (req, res) => {
       'INSERT INTO todos (user_id, title) VALUES ($1, $2) RETURNING id, title, completed, created_at, updated_at',
       [req.user.id, title.trim()]
     );
-    sseGroup.broadcast({ key: ['todos'] }, (meta) => meta.userId === req.user.id);
+    await sseGroup.publish(`user:${req.user.id}`, { key: ['todos'] });
     return res.status(201).json(result.rows[0]);
   } catch (error) {
     console.error('Error creating todo:', error);
@@ -87,7 +87,7 @@ router.put('/:id', async (req, res) => {
       'UPDATE todos SET title = $1, completed = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3 RETURNING id, title, completed, created_at, updated_at',
       [updatedTitle.trim(), updatedCompleted, todoId]
     );
-    sseGroup.broadcast({ key: ['todos'] }, (meta) => meta.userId === req.user.id);
+    await sseGroup.publish(`user:${req.user.id}`, { key: ['todos'] });
     return res.status(200).json(updateResult.rows[0]);
   } catch (error) {
     console.error('Error updating todo:', error);
@@ -114,7 +114,7 @@ router.delete('/:id', async (req, res) => {
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Todo not found.' });
     }
-    sseGroup.broadcast({ key: ['todos'] }, (meta) => meta.userId === req.user.id);
+    await sseGroup.publish(`user:${req.user.id}`, { key: ['todos'] });
     return res.status(200).json({ message: 'Todo deleted successfully.' });
   } catch (error) {
     console.error('Error deleting todo:', error);

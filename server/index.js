@@ -59,7 +59,9 @@ app.use('/api/todos', todosRouter);
 // SSE real-time cache invalidation endpoint
 app.get('/api/sse', authMiddleware, (req, res) => {
   const channel = attachSSE(req, res);
-  sseGroup.register(channel, { userId: req.user.id });
+  sseGroup.register(channel, { userId: req.user.id }, {
+    topics: [`user:${req.user.id}`]
+  });
 
   req.on('close', () => {
     sseGroup.deregister(channel);
