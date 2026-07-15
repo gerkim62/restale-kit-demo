@@ -221,7 +221,7 @@ importers:
         version: 5.2.1(supports-color@5.5.0)
       ioredis:
         specifier: ^5.4.1
-        version: 5.11.1
+        version: 5.11.1(supports-color@5.5.0)
       jsonwebtoken:
         specifier: ^9.0.3
         version: 9.0.3
@@ -229,8 +229,8 @@ importers:
         specifier: ^8.22.0
         version: 8.22.0
       restale-kit:
-        specifier: ^0.1.2
-        version: 0.1.2(ioredis@5.11.1)
+        specifier: ^0.2.0
+        version: 0.2.0(ioredis@5.11.1(supports-color@5.5.0))
     devDependencies:
       nodemon:
         specifier: ^3.1.14
@@ -649,8 +649,8 @@ packages:
     resolution: {integrity: sha512-DJnGAeenTdpMEH6uAJRK/uiyEIH9WVsUmoLwzudwGJUwZPp80PDBWPHXSAGNPwNvIXAbe7MSUB1zQFugFml66A==}
     engines: {node: '>=4'}
 
-  restale-kit@0.1.2:
-    resolution: {integrity: sha512-sSG3EAHg12w5DSTGxOvf81pKIyunFnbJiQ6oduVmoF4Pt5yvBH+tFut1O1KYTh3PSqqLK2LuKmF4sZFIbdPhBg==}
+  restale-kit@0.2.0:
+    resolution: {integrity: sha512-pp4Hwz3oJHDZoGGO03j4n7kxzUOvOrRitAQ89HxiOL0s4pW4iLgzfYAkO+/bPpFBzNBE/LigNsr1JyTLVPHTjA==}
     engines: {node: '>=22.13.0'}
     peerDependencies:
       '@tanstack/react-query': ^5.0.0
@@ -996,7 +996,7 @@ snapshots:
 
   inherits@2.0.4: {}
 
-  ioredis@5.11.1:
+  ioredis@5.11.1(supports-color@5.5.0):
     dependencies:
       '@ioredis/commands': 1.10.0
       cluster-key-slot: 1.1.1
@@ -1191,9 +1191,9 @@ snapshots:
     dependencies:
       redis-errors: 1.2.0
 
-  restale-kit@0.1.2(ioredis@5.11.1):
+  restale-kit@0.2.0(ioredis@5.11.1(supports-color@5.5.0)):
     optionalDependencies:
-      ioredis: 5.11.1
+      ioredis: 5.11.1(supports-color@5.5.0)
 
   router@2.2.0(supports-color@5.5.0):
     dependencies:

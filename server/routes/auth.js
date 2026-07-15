@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { pool } from '../db.js';
 import { authMiddleware } from '../middleware/auth.js';
+import { sseGroup } from '../sse.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_development_secret';
@@ -136,7 +137,19 @@ router.get('/me', authMiddleware, (req, res) => {
 });
 
 // POST /api/auth/logout
-router.post('/logout', (req, res) => {
+router.post('/logout', authMiddleware, async (req, res) => {
+  const { connectionId } = req.body || {};
+
+  try {
+    if (connectionId && typeof connectionId === 'string') {
+      await sseGroup.revokeByConnectionId(connectionId, { userId: req.user.id });
+    } else if (req.user?.id) {
+      await sseGroup.revokeWhere({ userId: req.user.id });
+    }
+  } catch (err) {
+    console.error('Error revoking SSE connection on logout:', err);
+  }
+
   res.clearCookie('token', CLEAR_COOKIE_OPTIONS);
   return res.status(200).json({ message: 'Logout successful' });
 });

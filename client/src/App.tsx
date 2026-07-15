@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ClipboardCheck, ClipboardList, LogOut, RotateCw } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useReStale } from 'restale-kit/react';
-import { tanstackAdapter } from 'restale-kit/tanstack-query';
+import { useTanstackQueryAdapter } from 'restale-kit/tanstack-query';
 import { api, getStoredUser, type Todo } from './api';
 import AuthCard from './components/AuthCard';
 import SkeletonLoader from './components/SkeletonLoader';
@@ -15,6 +15,7 @@ function App() {
   const [user, setUser] = useState<{ id: number; username: string } | null>(null);
   const [checkingSession, setCheckingSession] = useState(true);
   const queryClient = useQueryClient();
+  const onInvalidate = useTanstackQueryAdapter(queryClient);
 
   useEffect(() => {
     api.getMe()
@@ -30,8 +31,8 @@ function App() {
   }, []);
 
   // Setup real-time cache invalidation over Server-Sent Events (SSE)
-  useReStale(SSE_URL, {
-    onInvalidate: tanstackAdapter(queryClient),
+  const { connectionId } = useReStale(SSE_URL, {
+    onInvalidate,
     disabled: !user,
     withCredentials: true,
   });
@@ -64,7 +65,7 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      await api.logout();
+      await api.logout(connectionId);
     } catch (err) {
       console.error('Logout failed:', err);
     } finally {

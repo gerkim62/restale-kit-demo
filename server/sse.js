@@ -17,4 +17,4 @@ if (process.env.REDIS_URL) {
   console.log('Redis URL not configured. Running in single-instance mode (no Pub/Sub).');
 }
 
-export const sseGroup = new SSEChannelGroup({ pubsub });
+export const sseGroup = new SSEChannelGroup({ pubsub, eventBufferCapacity: 100 });
