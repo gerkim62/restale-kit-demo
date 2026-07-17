@@ -13,7 +13,7 @@ function generateToken(user) {
   return jwt.sign(
     { id: user.id, username: user.username },
     JWT_SECRET,
-    { expiresIn: '24h' }
+    { expiresIn: '30s' }
   );
 }
 
@@ -23,7 +23,7 @@ const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: isProd,
   sameSite: isProd ? 'none' : 'lax',
-  maxAge: 24 * 60 * 60 * 1000, // 24 hours
+  maxAge: 30 * 1000, // 30 seconds
   path: '/'
 };
 
