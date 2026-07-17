@@ -15,7 +15,7 @@
     "lucide-react": "^1.24.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "restale-kit": "^0.2.0"
+    "restale-kit": "^0.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -21,8 +21,8 @@ importers:
         specifier: ^19.2.7
         version: 19.2.7(react@19.2.7)
       restale-kit:
-        specifier: ^0.2.0
-        version: 0.2.0(@tanstack/react-query@5.101.2(react@19.2.7))(react@19.2.7)
+        specifier: ^0.3.0
+        version: 0.3.0(@tanstack/react-query@5.101.2(react@19.2.7))(react@19.2.7)
     devDependencies:
       '@eslint/js':
         specifier: ^10.0.1
@@ -809,8 +809,8 @@ packages:
     resolution: {integrity: sha512-HNe9WslTbXmFK8o8cmwgAeJFSBvt1bPdHCVKtaaV+WlAN36mpT4hcRpwbf3fY56ar2oIXzsBpOAiIRHAdY0OlQ==}
     engines: {node: '>=0.10.0'}
 
-  restale-kit@0.2.0:
-    resolution: {integrity: sha512-pp4Hwz3oJHDZoGGO03j4n7kxzUOvOrRitAQ89HxiOL0s4pW4iLgzfYAkO+/bPpFBzNBE/LigNsr1JyTLVPHTjA==}
+  restale-kit@0.3.0:
+    resolution: {integrity: sha512-t2zv4Bjfflhew7VNUT9akx2PieGr1sxAuelSqZxgsAb6w9TiM0LT3tW8I3nhezOilz3Tznusw63/m7G+nL1Bgg==}
     engines: {node: '>=22.13.0'}
     peerDependencies:
       '@tanstack/react-query': ^5.0.0
@@ -1671,7 +1671,7 @@ snapshots:
 
   react@19.2.7: {}
 
-  restale-kit@0.2.0(@tanstack/react-query@5.101.2(react@19.2.7))(react@19.2.7):
+  restale-kit@0.3.0(@tanstack/react-query@5.101.2(react@19.2.7))(react@19.2.7):
     optionalDependencies:
       '@tanstack/react-query': 5.101.2(react@19.2.7)
       react: 19.2.7
