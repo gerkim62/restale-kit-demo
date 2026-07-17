@@ -12,7 +12,10 @@ if (process.env.REDIS_URL) {
   redisClient.on('error', (err) => {
     console.error('Redis Client Error:', err);
   });
-  pubsub = redisPubSubAdapter(redisClient);
+  pubsub = redisPubSubAdapter(redisClient, process.env.PUBSUB_ENCRYPTION_KEY
+    ? { encryptionKey: process.env.PUBSUB_ENCRYPTION_KEY }
+    : { encrypt: false }
+  );
 } else {
   console.log('Redis URL not configured. Running in single-instance mode (no Pub/Sub).');
 }
