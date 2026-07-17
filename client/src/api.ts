@@ -94,9 +94,12 @@ export const api = {
     return data;
   },
 
-  async logout(): Promise<void> {
+  async logout(connectionId?: string): Promise<void> {
     try {
-      await request('/auth/logout', { method: 'POST' });
+      await request('/auth/logout', {
+        method: 'POST',
+        body: JSON.stringify({ connectionId }),
+      });
     } finally {
       setStoredUser(null);
     }

@@ -62,10 +62,6 @@ app.get('/api/sse', authMiddleware, (req, res) => {
   sseGroup.register(channel, { userId: req.user.id }, {
     topics: [`user:${req.user.id}`]
   });
-
-  req.on('close', () => {
-    sseGroup.deregister(channel);
-  });
 });
 
 // Database initialization & server start
