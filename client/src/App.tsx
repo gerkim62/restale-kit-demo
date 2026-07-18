@@ -35,6 +35,8 @@ function App() {
     onInvalidate,
     disabled: !user,
     withCredentials: true,
+    debug:true,
+
   });
 
   // Fetch Todos Query
@@ -54,7 +56,7 @@ function App() {
   // Create Todo Mutation
   const createTodoMutation = useMutation({
     mutationFn: api.createTodo,
-    onError: (err: any) => {
+    onError: (err) => {
       alert(err.message || 'Failed to create todo');
     }
   });
