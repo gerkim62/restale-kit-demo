@@ -13,7 +13,7 @@ if (process.env.REDIS_URL) {
     console.error('Redis Client Error:', err);
   });
   pubsub = redisPubSubAdapter(redisClient, process.env.PUBSUB_ENCRYPTION_KEY
-    ? { encryptionKey: process.env.PUBSUB_ENCRYPTION_KEY }
+    ? { encryptionKey: process.env.PUBSUB_ENCRYPTION_KEY,encrypt: true }
     : { encrypt: false }
   );
 } else {
