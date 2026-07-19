@@ -229,8 +229,8 @@ importers:
         specifier: ^8.22.0
         version: 8.22.0
       restale-kit:
-        specifier: ^0.3.3
-        version: 0.3.3(ioredis@5.11.1(supports-color@5.5.0))
+        specifier: ^0.3.4
+        version: 0.3.4(ioredis@5.11.1(supports-color@5.5.0))
     devDependencies:
       nodemon:
         specifier: ^3.1.14
@@ -649,8 +649,8 @@ packages:
     resolution: {integrity: sha512-DJnGAeenTdpMEH6uAJRK/uiyEIH9WVsUmoLwzudwGJUwZPp80PDBWPHXSAGNPwNvIXAbe7MSUB1zQFugFml66A==}
     engines: {node: '>=4'}
 
-  restale-kit@0.3.3:
-    resolution: {integrity: sha512-WKQbP7JZjIn+btPzXn1o8o2K1m1mFkQlR2p2O371f7uHdAqgmkK+QK8DRZ0Zbo9pnF3ye+EwOWZP88yCX9vzyQ==}
+  restale-kit@0.3.4:
+    resolution: {integrity: sha512-I8ENWq8PUNzzX/Bm0ChRFm+kFLcWNldjU70Jp6wPCPq9vEtSu4x9ayB/TmREIzMPWBrs41u3IoOQoCdOIagtmg==}
     engines: {node: '>=22.13.0'}
     peerDependencies:
       '@tanstack/react-query': ^5.0.0
@@ -1191,7 +1191,7 @@ snapshots:
     dependencies:
       redis-errors: 1.2.0
 
-  restale-kit@0.3.3(ioredis@5.11.1(supports-color@5.5.0)):
+  restale-kit@0.3.4(ioredis@5.11.1(supports-color@5.5.0)):
     optionalDependencies:
       ioredis: 5.11.1(supports-color@5.5.0)
 
