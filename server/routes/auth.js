@@ -4,9 +4,9 @@ import jwt from 'jsonwebtoken';
 import { pool } from '../db.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { sseGroup } from '../sse.js';
+import { JWT_SECRET } from '../config.js';
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_development_secret';
 
 // Helper to generate JWT token
 function generateToken(user) {

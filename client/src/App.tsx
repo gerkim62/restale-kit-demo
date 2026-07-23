@@ -3,7 +3,7 @@ import { ClipboardCheck, ClipboardList, LogOut, RotateCw } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useReStale } from 'restale-kit/react';
 import { useTanstackQueryAdapter } from 'restale-kit/tanstack-query';
-import { api, getStoredUser, type Todo } from './api';
+import { api, getStoredUser, setStoredUser, type Todo } from './api';
 import AuthCard from './components/AuthCard';
 import SkeletonLoader from './components/SkeletonLoader';
 import TodoForm from './components/TodoForm';
@@ -31,12 +31,25 @@ function App() {
   }, []);
 
   // Setup real-time cache invalidation over Server-Sent Events (SSE)
-  const { connectionId } = useReStale(SSE_URL, {
+  const { connectionId, close: closeSSE } = useReStale(SSE_URL, {
     onInvalidate,
     disabled: !user,
     withCredentials: true,
-    debug:true,
-
+    debug: true,
+    onRevoke: (detail) => {
+      // Covers three server-initiated close paths:
+      //   reason: undefined       — explicit logout via revokeByConnectionId / revokeWhere
+      //   reason: 'token-expired' — JWT exp deadline fired, or beforeFrame caught expiry
+      //   reason: 'token-missing' — beforeFrame found no auth cookie mid-connection
+      if (detail.reason && detail.reason !== 'token-expired' && detail.reason !== 'token-missing') {
+        // Unexpected reason — still clean up, but surface it for debugging.
+        console.warn('[SSE] Connection revoked by server, reason:', detail.reason);
+      }
+      setUser(null);
+      queryClient.clear();
+      // Clear persisted user so the login screen starts clean.
+      setStoredUser(null);
+    },
   });
 
   // Fetch Todos Query
@@ -66,6 +79,9 @@ function App() {
   };
 
   const handleLogout = async () => {
+    // Close the SSE connection immediately on the client side so no further
+    // frames are delivered even before the server-side revoke arrives.
+    closeSSE();
     try {
       await api.logout(connectionId);
     } catch (err) {
